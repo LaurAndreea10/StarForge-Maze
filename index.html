@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="StarForge Maze — joc arcade bilingv cu o minge într-un labirint care colectează stele.">
+  <title>StarForge Maze</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#gameCanvas">Sari la joc</a>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="StarForge Maze">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span><strong>STARFORGE</strong><small>MAZE PROTOCOL</small></span>
+      </a>
+
+      <nav class="top-actions" aria-label="Acțiuni principale">
+        <button id="languageButton" class="icon-button" type="button" aria-label="Switch to English">EN</button>
+        <button id="soundButton" class="icon-button" type="button" aria-pressed="true" aria-label="Sunet pornit">🔊</button>
+        <button id="helpButton" class="icon-button" type="button" aria-label="Deschide instrucțiunile">?</button>
+        <button id="themeButton" class="icon-button" type="button" aria-label="Schimbă tema">☾</button>
+      </nav>
+    </header>
+
+    <main id="gameArea" class="game-layout">
+      <section class="main-column">
+        <div class="hero-panel">
+          <div>
+            <p class="eyebrow">BlockForge Universe · Arcade Mission</p>
+            <h1>StarForge Maze</h1>
+            <p>Condu nucleul energetic, colectează toate stelele și activează portalul.</p>
+          </div>
+          <div class="hero-actions">
+            <label><span>Mod</span><select id="modeSelect"><option value="campaign">Campaign</option><option value="challenge">Challenge</option><option value="survival">Survival</option></select></label>
+            <label><span>Dificultate</span><select id="difficultySelect"><option value="easy">Ușor</option><option value="normal" selected>Normal</option><option value="hard">Dificil</option></select></label>
+          </div>
+        </div>
+
+        <section class="stats-grid" aria-label="Statistici joc" aria-live="polite">
+          <article class="stat-card"><span id="labelStars">Stele</span><strong><b id="starsValue">0</b>/<b id="starsTotal">0</b></strong></article>
+          <article class="stat-card"><span id="labelScore">Scor</span><strong id="scoreValue">0</strong></article>
+          <article class="stat-card"><span id="labelCombo">Combo</span><strong id="comboValue">x1</strong></article>
+          <article class="stat-card"><span id="labelTime">Timp</span><strong id="timeValue">01:30</strong></article>
+          <article class="stat-card"><span id="labelLives">Vieți</span><strong id="livesValue" aria-label="3 vieți">❤❤❤</strong></article>
+          <article class="stat-card"><span id="labelLevel">Nivel</span><strong id="levelValue">1</strong></article>
+        </section>
+
+        <section class="game-card">
+          <div class="game-toolbar">
+            <div><span id="statusBadge" class="status-badge">Misiune activă</span> <span id="objectiveText">Colectează toate stelele.</span></div>
+            <div class="toolbar-buttons"><button id="pauseButton" type="button" aria-pressed="false">Pauză</button><button id="restartButton" type="button">Restart</button></div>
+          </div>
+
+          <div class="progress-row">
+            <div><span id="progressLabel">Progresul misiunii</span><strong id="progressText">0%</strong></div>
+            <div id="progressTrack" class="progress-track" role="progressbar" aria-labelledby="progressLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressBar" class="progress-bar"></div></div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="gameCanvas" width="720" height="720" tabindex="0" role="img" aria-label="Labirint interactiv StarForge. Folosește tastele săgeți sau WASD pentru deplasare."></canvas>
+            <div id="pauseOverlay" class="game-overlay hidden"><div role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><span class="overlay-icon" aria-hidden="true">Ⅱ</span><h2 id="pauseTitle">Joc în pauză</h2><p>Apasă din nou pe Pauză sau tasta P.</p><button id="resumeButton" type="button">Continuă</button></div></div>
+            <div id="resultOverlay" class="game-overlay hidden"><div role="dialog" aria-modal="true" aria-labelledby="resultTitle"><span id="resultIcon" class="overlay-icon" aria-hidden="true">★</span><h2 id="resultTitle">Misiune completă</h2><p id="resultText"></p><div class="result-stats"><span>Scor <strong id="resultScore">0</strong></span><span>Stele <strong id="resultStars">0</strong></span><span>Mișcări <strong id="resultMoves">0</strong></span></div><div class="result-actions"><button id="nextLevelButton" type="button">Nivelul următor</button><button id="playAgainButton" class="secondary" type="button">Joacă din nou</button></div></div></div>
+          </div>
+
+          <div id="messageBox" class="message-box" role="status" aria-live="polite">Misiune începută. Găsește prima steluță.</div>
+          <div class="mobile-controls" aria-label="Comenzi tactile"><span></span><button class="move-button" data-direction="up" type="button" aria-label="Sus">▲</button><span></span><button class="move-button" data-direction="left" type="button" aria-label="Stânga">◀</button><button class="move-button center-button" data-direction="down" type="button" aria-label="Jos">▼</button><button class="move-button" data-direction="right" type="button" aria-label="Dreapta">▶</button></div>
+        </section>
+      </section>
+
+      <aside class="sidebar">
+        <section class="side-panel">
+          <div class="panel-heading"><div><p class="eyebrow">Echipament</p><h2>Toolbox</h2></div><span id="energyValue" class="energy-badge">100%</span></div>
+          <div id="energyTrack" class="energy-track" role="progressbar" aria-label="Energie" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div id="energyBar"></div></div>
+          <div class="tool-grid">
+            <button class="tool-button" id="scanTool" data-tool="scan" data-cost="8" type="button"><span aria-hidden="true">⌾</span><strong>Scanner</strong><small>8 energie</small></button>
+            <button class="tool-button" id="shieldTool" data-tool="shield" data-cost="15" type="button"><span aria-hidden="true">⬡</span><strong>Scut</strong><small>15 energie</small></button>
+            <button class="tool-button" id="magnetTool" data-tool="magnet" data-cost="20" type="button"><span aria-hidden="true">∩</span><strong>Magnet</strong><small>20 energie</small></button>
+            <button class="tool-button" id="teleportTool" data-tool="teleport" data-cost="25" type="button"><span aria-hidden="true">⌁</span><strong>Teleport</strong><small>25 energie</small></button>
+            <button class="tool-button" id="undoTool" type="button"><span aria-hidden="true">↶</span><strong>Înapoi</strong><small>1 mișcare</small></button>
+            <button class="tool-button" id="hintTool" data-cost="10" type="button"><span aria-hidden="true">✦</span><strong>Indiciu</strong><small>10 energie</small></button>
+          </div>
+        </section>
+
+        <section class="side-panel"><div class="panel-heading compact"><div><p class="eyebrow">Obiective</p><h2>Misiune</h2></div></div><ul class="mission-list"><li id="missionStars"><span class="mission-check">1</span><div><strong>Colectează stelele</strong><small id="missionStarsText">0 din 0</small></div></li><li id="missionKey"><span class="mission-check">2</span><div><strong>Recuperează cheia</strong><small id="missionKeyText">Necapturată</small></div></li><li id="missionPortal"><span class="mission-check">3</span><div><strong>Activează portalul</strong><small id="missionPortalText">Blocat</small></div></li></ul></section>
+
+        <section class="side-panel"><div class="panel-heading compact"><div><p class="eyebrow">Inventar</p><h2>Resurse</h2></div></div><div class="inventory-grid"><div><span>◆</span><strong id="coinValue">0</strong><small>Cristale</small></div><div><span>⚿</span><strong id="keyValue">0</strong><small>Chei</small></div><div><span>⬡</span><strong id="shieldValue">0</strong><small>Scuturi</small></div></div></section>
+
+        <section class="side-panel"><div class="panel-heading compact"><div><p class="eyebrow">Record</p><h2>Best</h2></div><span id="bestValue" class="energy-badge">0</span></div><p class="best-note">Scor maxim salvat local pe acest dispozitiv.</p></section>
+        <section class="side-panel controls-panel"><p><kbd>WASD</kbd> sau <kbd>↑ ↓ ← →</kbd> deplasare</p><p><kbd>P</kbd> pauză · <kbd>R</kbd> restart</p><p><kbd>1–4</kbd> unelte · <kbd>U</kbd> înapoi · <kbd>H</kbd> indiciu</p></section>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="helpDialog" aria-labelledby="helpTitle">
+    <button id="closeHelpButton" class="dialog-close" type="button" aria-label="Închide">×</button>
+    <p class="eyebrow">Instrucțiuni</p><h2 id="helpTitle">Cum se joacă</h2>
+    <ol><li>Deplasează mingea prin labirint.</li><li>Colectează toate steluțele și cheia.</li><li>Evită capcanele roșii sau activează scutul.</li><li>Folosește bonusurile pentru energie, timp și puncte.</li><li>Intră în portal după îndeplinirea obiectivelor.</li></ol>
+    <div class="legend"><span><b>★</b> Stea</span><span><b>⚿</b> Cheie</span><span><b>◆</b> Cristal</span><span><b>✚</b> Energie</span><span><b>×</b> Capcană</span><span><b>⬡</b> Portal</span></div>
+  </dialog>
+
+  <script src="script.js"></script>
+  <script>
+    (() => {
+      const translations = {
+        'Sari la joc':'Skip to game','Acțiuni principale':'Main actions','Sunet pornit':'Sound on','Deschide instrucțiunile':'Open instructions','Schimbă tema':'Change theme',
+        'Condu nucleul energetic, colectează toate stelele și activează portalul.':'Guide the energy core, collect every star, and activate the portal.',
+        'Mod':'Mode','Dificultate':'Difficulty','Ușor':'Easy','Dificil':'Hard','Statistici joc':'Game statistics','Stele':'Stars','Scor':'Score','Timp':'Time','Vieți':'Lives','Nivel':'Level',
+        'Misiune activă':'Mission active','Colectează toate stelele.':'Collect every star.','Pauză':'Pause','Progresul misiunii':'Mission progress',
+        'Joc în pauză':'Game paused','Apasă din nou pe Pauză sau tasta P.':'Press Pause again or the P key.','Continuă':'Resume','Misiune completă':'Mission complete','Mișcări':'Moves','Nivelul următor':'Next level','Joacă din nou':'Play again',
+        'Misiune începută. Găsește prima steluță.':'Mission started. Find the first star.','Comenzi tactile':'Touch controls','Sus':'Up','Stânga':'Left','Jos':'Down','Dreapta':'Right',
+        'Echipament':'Equipment','Energie':'Energy','Scut':'Shield','Înapoi':'Undo','Indiciu':'Hint','energie':'energy','mișcare':'move',
+        'Obiective':'Objectives','Misiune':'Mission','Colectează stelele':'Collect the stars','Recuperează cheia':'Recover the key','Activează portalul':'Activate the portal','Necapturată':'Not collected','Blocat':'Locked','din':'of',
+        'Inventar':'Inventory','Resurse':'Resources','Cristale':'Crystals','Chei':'Keys','Scuturi':'Shields','Scor maxim salvat local pe acest dispozitiv.':'Best score saved locally on this device.',
+        'sau':'or','deplasare':'movement','unelte':'tools','înapoi':'undo','indiciu':'hint','Instrucțiuni':'Instructions','Cum se joacă':'How to play','Închide':'Close',
+        'Deplasează mingea prin labirint.':'Move the ball through the maze.','Colectează toate steluțele și cheia.':'Collect every star and the key.','Evită capcanele roșii sau activează scutul.':'Avoid red traps or activate the shield.','Folosește bonusurile pentru energie, timp și puncte.':'Use bonuses for energy, time, and points.','Intră în portal după îndeplinirea obiectivelor.':'Enter the portal after completing the objectives.','Stea':'Star','Cheie':'Key','Cristal':'Crystal','Capcană':'Trap','Portal':'Portal'
+      };
+      const reverse = Object.fromEntries(Object.entries(translations).map(([ro,en]) => [en,ro]));
+      const button = document.getElementById('languageButton');
+      let language = localStorage.getItem('starforge-language') || 'ro';
+
+      function replaceText(root, map) {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        nodes.forEach(node => {
+          const raw = node.nodeValue;
+          const trimmed = raw.trim();
+          if (!trimmed) return;
+          let value = trimmed;
+          if (map[value]) value = map[value];
+          else Object.entries(map).sort((a,b) => b[0].length-a[0].length).forEach(([from,to]) => { value = value.replaceAll(from,to); });
+          if (value !== trimmed) node.nodeValue = raw.replace(trimmed, value);
+        });
+      }
+
+      function applyLanguage(next) {
+        const previous = document.documentElement.lang;
+        if (previous !== next) replaceText(document.body, next === 'en' ? translations : reverse);
+        document.documentElement.lang = next;
+        document.title = next === 'en' ? 'StarForge Maze — Bilingual Arcade Game' : 'StarForge Maze — Joc Arcade Bilingv';
+        document.querySelector('meta[name="description"]').content = next === 'en' ? 'StarForge Maze — a bilingual arcade maze game where an energy ball collects stars.' : 'StarForge Maze — joc arcade bilingv cu o minge într-un labirint care colectează stele.';
+        button.textContent = next === 'en' ? 'RO' : 'EN';
+        button.setAttribute('aria-label', next === 'en' ? 'Schimbă în română' : 'Switch to English');
+        localStorage.setItem('starforge-language', next);
+        language = next;
+      }
+
+      button.addEventListener('click', () => applyLanguage(language === 'ro' ? 'en' : 'ro'));
+      const observer = new MutationObserver(() => { if (language === 'en') replaceText(document.body, translations); });
+      observer.observe(document.body, {childList:true, subtree:true, characterData:true});
+      if (language === 'en') applyLanguage('en');
+    })();
+  </script>
+</body>
+</html>
